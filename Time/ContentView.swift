@@ -54,7 +54,10 @@ struct ContentView: View {
 
     func startTimer() {
         startTime = Date()
-        print("⏱️ Start at \(startTime!)")
+        let formatter = DateFormatter()
+        formatter.timeZone = TimeZone(identifier: "Europe/Zurich")
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
+        print("⏱️ Start at \(formatter.string(from: startTime!))")
         timerRunning = true
 
         timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
@@ -67,8 +70,11 @@ struct ContentView: View {
     func stopTimer() {
         if let start = startTime {
             let stopTime = Date()
+            let formatter = DateFormatter()
+            formatter.timeZone = TimeZone(identifier: "Europe/Zurich")
+            formatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
+            print("🛑 Stop at \(formatter.string(from: stopTime))")
             let duration = stopTime.timeIntervalSince(start)
-            print("🛑 Stop at \(stopTime)")
             print("⏳ Duration: \(formattedTime(from: duration))")
         }
 
