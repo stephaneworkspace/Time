@@ -45,6 +45,12 @@ struct ContentView: View {
         .frame(width: 300, height: 250)
         .padding()
     }
+    
+    init() {
+        if let token = readToken() {
+            print("🔐 Token lu : \(token)")
+        }
+    }
 
     func startTimer() {
         startTime = Date()
