@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct TimeApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     var body: some Scene {
-        WindowGroup {
-            ContentView()
+        // On laisse la scène vide car on contrôle tout via AppDelegate
+        Settings {
+            EmptyView()
         }
     }
 }
