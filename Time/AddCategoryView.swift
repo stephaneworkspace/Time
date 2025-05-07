@@ -28,14 +28,18 @@ struct AddCategoryView: View {
                 .padding()
                 .focused($isTextFieldFocused)
 
-            Button("Créer") {
+            Button(action: {
                 CategoryController.createCategory(named: newCategoryName) { decoded in
                     if let newCategory = decoded.last {
                         onSave(newCategory)
                         dismiss()
                     }
                 }
+            }) {
+                Text("Créer")
+                    .underline()
             }
+            .keyboardShortcut(.defaultAction)
 
             Button("Annuler") {
                 dismiss()
