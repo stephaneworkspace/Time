@@ -106,7 +106,11 @@ struct ContentView: View {
             }
         }
         .sheet(isPresented: $showingEditCategory) {
-            EditCategoryView(category: $selectedCategory)
+            EditCategoryView(category: $selectedCategory) { updatedCategory in
+                if let index = categories.firstIndex(where: { $0.id == updatedCategory.id }) {
+                    categories[index] = updatedCategory
+                }
+            }
         }
         .alert(item: $deleteErrorMessage) { message in
             Alert(title: Text("Erreur"), message: Text(message.text), dismissButton: .default(Text("OK")))

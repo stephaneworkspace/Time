@@ -9,6 +9,7 @@ import SwiftUI
 
 struct EditCategoryView: View {
     @Binding var category: Category
+    var onSave: (Category) -> Void
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
@@ -23,8 +24,14 @@ struct EditCategoryView: View {
                 Button("Annuler") {
                     dismiss()
                 }
-                Button("OK") {
-                    dismiss()
+                Button(action: {
+                    CategoryController.editCategory(id: category.id, newName: category.name) { _ in
+                        onSave(category)
+                        dismiss()
+                    }
+                }) {
+                    Text("OK")
+                        .underline()
                 }
                 .keyboardShortcut(.defaultAction)
             }
