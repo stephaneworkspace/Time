@@ -90,6 +90,20 @@ struct ContentView: View {
                 Button("+") {
                     showingAddProject = true
                 }
+                Button("-") {
+                    if let categoryId = selectedCategoryId {
+                        if let id = selectedProjectId {
+                            if readToken() != nil {
+                                ProjectController.deleteProject(categoyId: categoryId, id: id, completion: { decoded in
+                                    self.projects = decoded
+                                    self.selectedProjectId = decoded.first?.id
+                                }, onError: { errorMessage in
+                                    self.deleteErrorMessage = StringMessage(text: errorMessage)
+                                })
+                            }
+                        }
+                    }
+                }
             }
             Text(formattedTime(from: elapsedTime))
                 .font(.system(size: 48, weight: .bold, design: .monospaced))
