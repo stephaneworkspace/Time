@@ -12,19 +12,27 @@ struct ContentView: View {
     @State private var elapsedTime: TimeInterval = 0
     @State private var timerRunning = false
     @State private var timer: Timer?
+    
     @State private var categories: [Category] = []
     @State private var selectedCategoryId: Int?
+    
+    @State private var showingAddCategory = false
+    @State private var newCategoryName = ""
 
     var body: some View {
         VStack(spacing: 20) {
-            Picker("Catégorie", selection: $selectedCategoryId) {
-                ForEach(categories) { category in
-                    Text(category.name).tag(category.id as Int?)
+            HStack {
+                Picker("Catégorie", selection: $selectedCategoryId) {
+                    ForEach(categories) { category in
+                        Text(category.name).tag(category.id as Int?)
+                    }
+                }
+                .pickerStyle(MenuPickerStyle())
+                .padding()
+                Button("+") {
+                    showingAddCategory = true
                 }
             }
-            .pickerStyle(MenuPickerStyle())
-            .padding()
-
             Text(formattedTime(from: elapsedTime))
                 .font(.system(size: 48, weight: .bold, design: .monospaced))
             
@@ -61,6 +69,30 @@ struct ContentView: View {
                     self.selectedCategoryId = decoded.first?.id
                 }
             }
+        }
+        .sheet(isPresented: $showingAddCategory) {
+            VStack(spacing: 20) {
+                Text("Nouvelle catégorie")
+                    .font(.headline)
+                TextField("Nom de la catégorie", text: $newCategoryName)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+
+                Button("Créer") {
+                    CategoryController.createCategory(named: newCategoryName) { decoded in
+                        self.categories = decoded
+                        self.selectedCategoryId = decoded.last?.id
+                    }
+                    newCategoryName = ""
+                    showingAddCategory = false
+                }
+
+                Button("Annuler") {
+                    showingAddCategory = false
+                }
+            }
+            .frame(width: 300)
+            .padding()
         }
     }
 

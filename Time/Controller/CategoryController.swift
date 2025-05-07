@@ -38,4 +38,28 @@ class CategoryController {
 
         task.resume()
     }
+    
+    static func createCategory(named name: String, completion: @escaping ([Category]) -> Void) {
+        guard let token = readToken(),
+              let url = URL(string: "https://time.bressani.dev:3443/api/categories") else { return }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let body = ["name": name]
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let httpRes = response as? HTTPURLResponse {
+                print("📦 POST status: \(httpRes.statusCode)")
+            }
+            if let _ = data {
+                DispatchQueue.main.async {
+                    fetchCategories(token: token, completion: completion)
+                }
+            }
+        }.resume()
+    }
 }
