@@ -29,6 +29,8 @@ struct ContentView: View {
     @State private var selectedCategory = Category(id: 0, name: "")
     
     @State private var showingAddProject = false
+    @State private var showingEditProject = false
+    @State private var selectedProject = Project(id: 0, name: "", categoryId: 0)
 
     struct StringMessage: Identifiable {
         var id: String { text }
@@ -104,6 +106,12 @@ struct ContentView: View {
                         }
                     }
                 }
+                Button("Édit") {
+                    if let id = selectedProjectId, let project = projects.first(where: { $0.id == id }) {
+                        selectedProject = project
+                        showingEditProject = true
+                    }
+                }
             }
             Text(formattedTime(from: elapsedTime))
                 .font(.system(size: 48, weight: .bold, design: .monospaced))
@@ -173,6 +181,13 @@ struct ContentView: View {
         }
         .alert(item: $deleteErrorMessage) { message in
             Alert(title: Text("Erreur"), message: Text(message.text), dismissButton: .default(Text("OK")))
+        }
+        .sheet(isPresented: $showingEditProject) {
+            EditProjectView(project: $selectedProject) { updatedProject in
+                if let index = projects.firstIndex(where: { $0.id == updatedProject.id }) {
+                    projects[index] = updatedProject
+                }
+            }
         }
     }
 

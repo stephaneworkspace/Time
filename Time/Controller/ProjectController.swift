@@ -10,7 +10,14 @@ import Foundation
 
 struct Project: Identifiable, Decodable {
     let id: Int
-    let name: String
+    var name: String
+    var categoryId: Int
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case categoryId = "category_id"
+    }
 }
 
 
@@ -76,6 +83,49 @@ class ProjectController {
                 print("❌ Échec décodage projet créé")
                 print(String(data: data, encoding: .utf8) ?? "Données illisibles")
                 completion(nil)
+            }
+        }.resume()
+    }
+    
+    static func editProject(id: Int, name: String, categoryId: Int, completion: @escaping ([Category]) -> Void) {
+        guard let token = readToken(),
+              let url = URL(string: "https://time.bressani.dev:3443/api/projects/\(id)") else {
+            completion([])
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let body: [String: Any] = [
+            "project": [
+                "name": name,
+                "category_id": categoryId
+            ]
+        ]
+
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let httpRes = response as? HTTPURLResponse {
+                print("✏️ PUT status: \(httpRes.statusCode)")
+            }
+            guard let data = data, error == nil else {
+                print("❌ Erreur mise à jour projet : \(error?.localizedDescription ?? "inconnue")")
+                completion([])
+                return
+            }
+
+            if let _ = try? JSONDecoder().decode(Project.self, from: data) {
+                DispatchQueue.main.async {
+                    completion([])
+                }
+            } else {
+                print("❌ Échec décodage projet mis à jour")
+                print(String(data: data, encoding: .utf8) ?? "Données illisibles")
+                completion([])
             }
         }.resume()
     }
