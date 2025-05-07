@@ -37,7 +37,6 @@ struct AddCategoryView: View {
                 }
             }) {
                 Text("Créer")
-                    .underline()
             }
             .keyboardShortcut(.defaultAction)
 

@@ -31,7 +31,6 @@ struct EditCategoryView: View {
                     }
                 }) {
                     Text("OK")
-                        .underline()
                 }
                 .keyboardShortcut(.defaultAction)
             }

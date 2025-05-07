@@ -27,6 +27,8 @@ struct ContentView: View {
     
     @State private var showingEditCategory = false
     @State private var selectedCategory = Category(id: 0, name: "")
+    
+    @State private var showingAddProject = false
 
     struct StringMessage: Identifiable {
         var id: String { text }
@@ -85,6 +87,9 @@ struct ContentView: View {
                     Text("Aucun projet")
                         .foregroundColor(.gray)
                 }
+                Button("+") {
+                    showingAddProject = true
+                }
             }
             Text(formattedTime(from: elapsedTime))
                 .font(.system(size: 48, weight: .bold, design: .monospaced))
@@ -140,6 +145,16 @@ struct ContentView: View {
                 if let index = categories.firstIndex(where: { $0.id == updatedCategory.id }) {
                     categories[index] = updatedCategory
                 }
+            }
+        }
+        .sheet(isPresented: $showingAddProject) {
+            // let selectedCategoryName = categories.first(where: { $0.id == selectedCategoryId })?.name ?? ""
+            AddProjectView(
+                categoryId: selectedCategoryId ?? 0,
+                defaultProjectName: ""
+            ) { newProject in
+                projects.append(newProject)
+                selectedProjectId = newProject.id
             }
         }
         .alert(item: $deleteErrorMessage) { message in
