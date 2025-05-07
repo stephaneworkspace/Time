@@ -20,6 +20,9 @@ struct ContentView: View {
     @State private var newCategoryName = ""
     @State private var deleteErrorMessage: StringMessage? = nil
 
+    @State private var projects: [Project] = []
+    @State private var selectedProjectId: Int?
+
     @FocusState private var isTextFieldFocused: Bool
     
     @State private var showingEditCategory = false
@@ -39,6 +42,14 @@ struct ContentView: View {
                     }
                 }
                 .pickerStyle(MenuPickerStyle())
+                .onChange(of: selectedCategoryId) { _, newValue in
+                    if let id = newValue {
+                        ProjectController.fetchProjects(forCategoryId: id) { decodedProjects in
+                            self.projects = decodedProjects
+                            self.selectedProjectId = decodedProjects.first?.id
+                        }
+                    }
+                }
                 Button("+") {
                     showingAddCategory = true
                 }
@@ -61,6 +72,19 @@ struct ContentView: View {
                     }
                 }
                 .disabled(selectedCategoryId == nil)
+            }
+            HStack {
+                if !projects.isEmpty {
+                    Picker("", selection: $selectedProjectId) {
+                        ForEach(projects) { project in
+                            Text(project.name).tag(project.id as Int?)
+                        }
+                    }
+                    .pickerStyle(MenuPickerStyle())
+                } else {
+                    Text("Aucun projet")
+                        .foregroundColor(.gray)
+                }
             }
             Text(formattedTime(from: elapsedTime))
                 .font(.system(size: 48, weight: .bold, design: .monospaced))
@@ -96,6 +120,12 @@ struct ContentView: View {
                 CategoryController.fetchCategories(token: token) { decoded in
                     self.categories = decoded
                     self.selectedCategoryId = decoded.first?.id
+                    if let categoryId = decoded.first?.id {
+                        ProjectController.fetchProjects(forCategoryId: categoryId) { decodedProjects in
+                            self.projects = decodedProjects
+                            self.selectedProjectId = decodedProjects.first?.id
+                        }
+                    }
                 }
             }
         }
