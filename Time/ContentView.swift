@@ -18,6 +18,12 @@ struct ContentView: View {
     
     @State private var showingAddCategory = false
     @State private var newCategoryName = ""
+    @State private var deleteErrorMessage: StringMessage? = nil
+
+    struct StringMessage: Identifiable {
+        var id: String { text }
+        let text: String
+    }
 
     var body: some View {
         VStack(spacing: 20) {
@@ -32,6 +38,19 @@ struct ContentView: View {
                 Button("+") {
                     showingAddCategory = true
                 }
+                Button("-") {
+                    if let id = selectedCategoryId {
+                        if readToken() != nil {
+                            CategoryController.deleteCategory(id: id, completion: { decoded in
+                                self.categories = decoded
+                                self.selectedCategoryId = decoded.first?.id
+                            }, onError: { errorMessage in
+                                self.deleteErrorMessage = StringMessage(text: errorMessage)
+                            })
+                        }
+                    }
+                }
+                .disabled(selectedCategoryId == nil)
             }
             Text(formattedTime(from: elapsedTime))
                 .font(.system(size: 48, weight: .bold, design: .monospaced))
@@ -93,6 +112,9 @@ struct ContentView: View {
             }
             .frame(width: 300)
             .padding()
+        }
+        .alert(item: $deleteErrorMessage) { message in
+            Alert(title: Text("Erreur"), message: Text(message.text), dismissButton: .default(Text("OK")))
         }
     }
 

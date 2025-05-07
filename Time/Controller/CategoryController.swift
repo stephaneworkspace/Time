@@ -62,4 +62,42 @@ class CategoryController {
             }
         }.resume()
     }
+
+    static func deleteCategory(id: Int, completion: @escaping ([Category]) -> Void, onError: @escaping (String) -> Void) {
+        guard let token = readToken(),
+              let url = URL(string: "https://time.bressani.dev:3443/api/categories/\(id)") else { return }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let httpRes = response as? HTTPURLResponse {
+                print("🗑 DELETE status: \(httpRes.statusCode)")
+
+                if httpRes.statusCode == 422, let data = data,
+                   let responseDict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let message = responseDict["error"] as? String {
+                    DispatchQueue.main.async {
+                        onError(message)
+                    }
+                    return
+                }
+                if httpRes.statusCode == 404, let data = data,
+                   let responseDict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let message = responseDict["error"] as? String {
+                    DispatchQueue.main.async {
+                        onError(message)
+                    }
+                    return
+                }
+            }
+
+            if error == nil {
+                DispatchQueue.main.async {
+                    fetchCategories(token: token, completion: completion)
+                }
+            }
+        }.resume()
+    }
 }
