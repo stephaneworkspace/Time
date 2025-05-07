@@ -20,6 +20,8 @@ struct ContentView: View {
     @State private var newCategoryName = ""
     @State private var deleteErrorMessage: StringMessage? = nil
 
+    @FocusState private var isTextFieldFocused: Bool
+
     struct StringMessage: Identifiable {
         var id: String { text }
         let text: String
@@ -96,14 +98,26 @@ struct ContentView: View {
                 TextField("Nom de la catégorie", text: $newCategoryName)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
+                    .focused($isTextFieldFocused)
+                    .onSubmit {
+                        CategoryController.createCategory(named: newCategoryName) { decoded in
+                            self.categories = decoded
+                            self.selectedCategoryId = decoded.last?.id
+                        }
+                        newCategoryName = ""
+                        showingAddCategory = false
+                    }
 
-                Button("Créer") {
+                Button(action: {
                     CategoryController.createCategory(named: newCategoryName) { decoded in
                         self.categories = decoded
                         self.selectedCategoryId = decoded.last?.id
                     }
                     newCategoryName = ""
                     showingAddCategory = false
+                }) {
+                    Text("Créer")
+                        .underline()
                 }
 
                 Button("Annuler") {
@@ -112,6 +126,7 @@ struct ContentView: View {
             }
             .frame(width: 300)
             .padding()
+            .onAppear { isTextFieldFocused = true }
         }
         .alert(item: $deleteErrorMessage) { message in
             Alert(title: Text("Erreur"), message: Text(message.text), dismissButton: .default(Text("OK")))
