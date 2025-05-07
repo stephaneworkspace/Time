@@ -2,7 +2,7 @@
 //  ContentView.swift
 //  Time
 //
-//  Created by Stéphane Bressani on 06.05.2025.
+//  Created by Stéphane Bressani on 07.05.2025.
 //
 
 import SwiftUI
@@ -21,6 +21,9 @@ struct ContentView: View {
     @State private var deleteErrorMessage: StringMessage? = nil
 
     @FocusState private var isTextFieldFocused: Bool
+    
+    @State private var showingEditCategory = false
+    @State private var selectedCategory = Category(id: 0, name: "")
 
     struct StringMessage: Identifiable {
         var id: String { text }
@@ -30,13 +33,12 @@ struct ContentView: View {
     var body: some View {
         VStack(spacing: 20) {
             HStack {
-                Picker("Catégorie", selection: $selectedCategoryId) {
+                Picker("", selection: $selectedCategoryId) {
                     ForEach(categories) { category in
                         Text(category.name).tag(category.id as Int?)
                     }
                 }
                 .pickerStyle(MenuPickerStyle())
-                .padding()
                 Button("+") {
                     showingAddCategory = true
                 }
@@ -50,6 +52,12 @@ struct ContentView: View {
                                 self.deleteErrorMessage = StringMessage(text: errorMessage)
                             })
                         }
+                    }
+                }
+                Button("Édit") {
+                    if let id = selectedCategoryId, let category = categories.first(where: { $0.id == id }) {
+                        selectedCategory = category
+                        showingEditCategory = true
                     }
                 }
                 .disabled(selectedCategoryId == nil)
@@ -92,41 +100,13 @@ struct ContentView: View {
             }
         }
         .sheet(isPresented: $showingAddCategory) {
-            VStack(spacing: 20) {
-                Text("Nouvelle catégorie")
-                    .font(.headline)
-                TextField("Nom de la catégorie", text: $newCategoryName)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-                    .focused($isTextFieldFocused)
-                    .onSubmit {
-                        CategoryController.createCategory(named: newCategoryName) { decoded in
-                            self.categories = decoded
-                            self.selectedCategoryId = decoded.last?.id
-                        }
-                        newCategoryName = ""
-                        showingAddCategory = false
-                    }
-
-                Button(action: {
-                    CategoryController.createCategory(named: newCategoryName) { decoded in
-                        self.categories = decoded
-                        self.selectedCategoryId = decoded.last?.id
-                    }
-                    newCategoryName = ""
-                    showingAddCategory = false
-                }) {
-                    Text("Créer")
-                        .underline()
-                }
-
-                Button("Annuler") {
-                    showingAddCategory = false
-                }
+            AddCategoryView(category: $selectedCategory) { newCategory in
+                selectedCategory = newCategory
+                categories.append(newCategory)
             }
-            .frame(width: 300)
-            .padding()
-            .onAppear { isTextFieldFocused = true }
+        }
+        .sheet(isPresented: $showingEditCategory) {
+            EditCategoryView(category: $selectedCategory)
         }
         .alert(item: $deleteErrorMessage) { message in
             Alert(title: Text("Erreur"), message: Text(message.text), dismissButton: .default(Text("OK")))

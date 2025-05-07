@@ -9,7 +9,7 @@ import Foundation
 
 struct Category: Identifiable, Decodable {
     let id: Int
-    let name: String
+    var name: String
 }
 
 class CategoryController {
