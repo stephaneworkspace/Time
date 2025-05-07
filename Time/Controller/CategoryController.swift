@@ -73,7 +73,7 @@ class CategoryController {
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        let body = ["name": newName]
+        let body = ["category": ["name": newName]]
         request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
 
         URLSession.shared.dataTask(with: request) { data, response, error in
