@@ -122,8 +122,9 @@ struct ContentView: View {
                 TextField("Commentaire", text: $commentaire)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .frame(width: 250)
-                    .disabled(selectedProjectId == nil)
                     .focused($isTextFieldFocused)
+                    .opacity(selectedProjectId == nil ? 0.5 : 1.0)
+                    .allowsHitTesting(selectedProjectId != nil)
             }
             if !projects.isEmpty {
                 Text(formattedTime(from: elapsedTime))
@@ -248,6 +249,7 @@ struct ContentView: View {
                     print("✅ Session enregistrée avec succès")
                 case .failure(let error):
                     print("❌ Erreur lors de la création de session : \(error.localizedDescription)")
+                    print("🔍 Erreur brute : \(error)")
                 }
             }
             

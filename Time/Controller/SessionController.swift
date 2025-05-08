@@ -22,8 +22,14 @@ class SessionController {
         commentaire: String? = nil,
         completion: @escaping (Result<Void, Error>) -> Void
     ) {
-        let url = URL(string: "https://time.bressani.dev/api/sessions")!
+        guard let token = readToken(),
+              let url = URL(string: "https://time.bressani.dev:3443/api/sessions") else {
+            completion(.failure(NSError(domain: "SessionController", code: -1, userInfo: [NSLocalizedDescriptionKey: "Token ou URL invalide."])))
+            return
+        }
+        
         var request = URLRequest(url: url)
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
