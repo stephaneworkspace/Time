@@ -36,6 +36,8 @@ struct ContentView: View {
     
     @State private var startDate: Date = Date()
     @State private var endDate: Date = Date()
+    
+    @State private var showingAddSession = false
 
     struct StringMessage: Identifiable {
         var id: String { text }
@@ -125,6 +127,11 @@ struct ContentView: View {
                     .focused($isTextFieldFocused)
                     .opacity(selectedProjectId == nil ? 0.5 : 1.0)
                     .allowsHitTesting(selectedProjectId != nil)
+                if !projects.isEmpty {
+                    Button("+") {
+                        showingAddSession = true
+                    }
+                }
             }
             if !projects.isEmpty {
                 Text(formattedTime(from: elapsedTime))
@@ -203,6 +210,12 @@ struct ContentView: View {
                     projects[index] = updatedProject
                 }
             }
+        }
+        .sheet(isPresented: $showingAddSession) {
+            AddSessionView(
+                projectId: selectedProjectId ?? 0,
+                defaultSessionComment: commentaire
+            )
         }
         .onChange(of: selectedProjectId) { _, newValue in
             if newValue != nil {
