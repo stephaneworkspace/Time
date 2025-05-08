@@ -49,7 +49,15 @@ class SessionController {
                 return
             }
 
-            guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+            guard let httpResponse = response as? HTTPURLResponse else {
+                let statusError = NSError(domain: "Invalid server response", code: 0, userInfo: nil)
+                completion(.failure(statusError))
+                return
+            }
+            
+            print("📝 POST status: \(httpResponse.statusCode)")
+
+            guard (200...299).contains(httpResponse.statusCode) else {
                 let statusError = NSError(domain: "Invalid server response", code: 0, userInfo: nil)
                 completion(.failure(statusError))
                 return
