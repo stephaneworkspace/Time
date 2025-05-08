@@ -31,6 +31,11 @@ struct ContentView: View {
     @State private var showingAddProject = false
     @State private var showingEditProject = false
     @State private var selectedProject = Project(id: 0, name: "", categoryId: 0)
+    
+    @State private var commentaire = ""
+    
+    @State private var startDate: Date = Date()
+    @State private var endDate: Date = Date()
 
     struct StringMessage: Identifiable {
         var id: String { text }
@@ -113,34 +118,43 @@ struct ContentView: View {
                     }
                 }
             }
-            Text(formattedTime(from: elapsedTime))
-                .font(.system(size: 48, weight: .bold, design: .monospaced))
-            
             HStack {
-                Button(action: startTimer) {
-                    Text("Start")
-                        .padding()
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+                TextField("Commentaire", text: $commentaire)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .frame(width: 250)
+                    .disabled(selectedProjectId == nil)
+                    .focused($isTextFieldFocused)
+            }
+            if !projects.isEmpty {
+                Text(formattedTime(from: elapsedTime))
+                    .font(.system(size: 48, weight: .bold, design: .monospaced))
+                
+                HStack {
+                    Button(action: startTimer) {
+                        Text("Start")
+                            .padding()
+                            .background(Color.green)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .disabled(timerRunning)
+                    
+                    Button(action: stopTimer) {
+                        Text("Stop")
+                            .padding()
+                            .background(Color.red)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .disabled(!timerRunning)
                 }
-                .disabled(timerRunning)
-
-                Button(action: stopTimer) {
-                    Text("Stop")
-                        .padding()
-                        .background(Color.red)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                }
-                .disabled(!timerRunning)
             }
 
             Button("Quitter") {
                 NSApplication.shared.terminate(nil)
             }
         }
-        .frame(width: 300, height: 250)
+        .frame(width: 300, height: 300)
         .padding()
         .onAppear {
             if let token = readToken() {
@@ -189,10 +203,16 @@ struct ContentView: View {
                 }
             }
         }
+        .onChange(of: selectedProjectId) { _, newValue in
+            if newValue != nil {
+                isTextFieldFocused = true
+            }
+        }
     }
 
     func startTimer() {
         startTime = Date()
+        self.startDate = startTime!
         let formatter = DateFormatter()
         formatter.timeZone = TimeZone(identifier: "Europe/Zurich")
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
@@ -209,12 +229,29 @@ struct ContentView: View {
     func stopTimer() {
         if let start = startTime {
             let stopTime = Date()
+            self.endDate = stopTime
             let formatter = DateFormatter()
             formatter.timeZone = TimeZone(identifier: "Europe/Zurich")
             formatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
             print("🛑 Stop at \(formatter.string(from: stopTime))")
             let duration = stopTime.timeIntervalSince(start)
             print("⏳ Duration: \(formattedTime(from: duration))")
+            
+            SessionController.createSession(
+                projectId: selectedProjectId!,
+                startedAt: startDate,
+                endedAt: endDate,
+                commentaire: commentaire
+            ) { result in
+                switch result {
+                case .success():
+                    print("✅ Session enregistrée avec succès")
+                case .failure(let error):
+                    print("❌ Erreur lors de la création de session : \(error.localizedDescription)")
+                }
+            }
+            
+            
         }
 
         timer?.invalidate()
