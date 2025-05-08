@@ -247,6 +247,7 @@ struct ContentView: View {
                 switch result {
                 case .success():
                     print("✅ Session enregistrée avec succès")
+                    commentaire = ""
                 case .failure(let error):
                     print("❌ Erreur lors de la création de session : \(error.localizedDescription)")
                     print("🔍 Erreur brute : \(error)")
@@ -268,6 +269,6 @@ struct ContentView: View {
         let seconds = totalSeconds % 60
         let centiseconds = Int((interval - Double(totalSeconds)) * 100)
 
-        return String(format: "%02d:%02d.%02d", minutes, seconds, centiseconds)
+        return String(format: "%04d:%02d.%02d", minutes, seconds, centiseconds)
     }
 }
