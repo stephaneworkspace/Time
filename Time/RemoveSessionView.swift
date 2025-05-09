@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct RemoveSessionView: View {
-    let projectId: Int
+    let categoryId: Int
     @State var selectedSessionId: Int = 0
     @State private var sessions: [Session] = []
     @State private var deleteErrorMessage: StringMessage? = nil
@@ -49,9 +49,13 @@ struct RemoveSessionView: View {
             }
             .padding()
             .frame(width: 300)
-            .onAppear {
-                // SessionController.fetchSession(projectId: projectId)
-            }
+        }
+        .onAppear {
+            print("ici")
+            SessionController.fetchSession(categoryId: categoryId, completion: { fetchedSessions in
+                self.sessions = fetchedSessions
+                self.selectedSessionId = fetchedSessions.first?.id ?? 0
+            })
         }
         .padding()
         .frame(width: 300)

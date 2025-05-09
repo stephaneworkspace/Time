@@ -227,7 +227,7 @@ struct ContentView: View {
             }
         }
         .sheet(isPresented: $showingRemoveSession) {
-            RemoveSessionView(projectId: selectedProjectId ?? 0)
+            RemoveSessionView(categoryId: selectedCategoryId ?? 0)
         }
     }
 

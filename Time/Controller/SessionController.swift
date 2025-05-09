@@ -74,6 +74,29 @@ class SessionController {
 
         task.resume()
     }
-    // TODO fetchSession https://time.bressani.dev:3443/api/sessions?category_id=
-    // with token
+    
+    static func fetchSession(categoryId: Int, completion: @escaping ([Session]) -> Void) {
+        guard let token = readToken(),
+              let url = URL(string: "https://time.bressani.dev:3443/api/sessions?category_id=\(categoryId)") else { return }
+        var request = URLRequest(url: url)
+
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.httpMethod = "GET"
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data, error == nil else {
+                print("❌ Erreur réseau projets : \(error?.localizedDescription ?? "inconnue")")
+                return
+            }
+
+            if let decoded = try? JSONDecoder().decode([Session].self, from: data) {
+                DispatchQueue.main.async {
+                    completion(decoded)
+                }
+            } else {
+                print("❌ Échec décodage projets")
+                print(String(data: data, encoding: .utf8) ?? "Données illisibles")
+            }
+        }.resume()
+    }
 }
