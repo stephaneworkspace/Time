@@ -24,7 +24,8 @@ struct RemoveSessionView: View {
             HStack {
                 Picker("", selection: $selectedSessionId) {
                     ForEach(sessions) { session in
-                        Text(session.id.formatted()+";"+session.started_at.formatted()).tag(session.id as Int?)
+                        Text("\(session.id); \(session.startedAt.formatted())")
+                            .tag(Int(session.id))
                     }
                 }
                 Button("-") {
@@ -51,7 +52,6 @@ struct RemoveSessionView: View {
             .frame(width: 300)
         }
         .onAppear {
-            print("ici")
             SessionController.fetchSession(categoryId: categoryId, completion: { fetchedSessions in
                 self.sessions = fetchedSessions
                 self.selectedSessionId = fetchedSessions.first?.id ?? 0

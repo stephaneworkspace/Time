@@ -9,9 +9,36 @@ import Foundation
 
 struct Session: Identifiable, Decodable {
     let id: Int
-    let product_id: Int
-    let started_at: Date
-    let ended_at: Date
+    let uuid: String?
+    let startedAt: Date
+    let endedAt: Date
+    let commentaire: String?
+    let projectId: Int
+    let createdAt: Date
+    let updatedAt: Date
+    let project: Project
+
+    enum CodingKeys: String, CodingKey {
+        case id, uuid
+        case startedAt = "started_at"
+        case endedAt = "ended_at"
+        case commentaire
+        case projectId = "project_id"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+        case project
+    }
+
+    struct Project: Decodable {
+        let id: Int
+        let name: String
+        let category: Category
+    }
+
+    struct Category: Decodable {
+        let id: Int
+        let name: String
+    }
 }
 
 class SessionController {
@@ -89,12 +116,20 @@ class SessionController {
                 return
             }
 
-            if let decoded = try? JSONDecoder().decode([Session].self, from: data) {
+            do {
+                let decoder = JSONDecoder()
+
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX"
+                formatter.locale = Locale(identifier: "en_US_POSIX")
+                decoder.dateDecodingStrategy = .formatted(formatter)
+
+                let sessions = try decoder.decode([Session].self, from: data)
                 DispatchQueue.main.async {
-                    completion(decoded)
+                    completion(sessions)
                 }
-            } else {
-                print("❌ Échec décodage projets")
+            } catch {
+                print("❌ Erreur de décodage : \(error)")
                 print(String(data: data, encoding: .utf8) ?? "Données illisibles")
             }
         }.resume()
