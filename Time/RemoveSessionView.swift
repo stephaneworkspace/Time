@@ -25,7 +25,8 @@ struct RemoveSessionView: View {
             HStack {
                 Picker("", selection: $selectedSessionId) {
                     ForEach(sessions) { session in
-                        Text("\(session.id); \(session.startedAt.formatted())")
+                        let duration = session.endedAt.timeIntervalSince(session.startedAt)
+                        Text("\(session.id); \(session.startedAt.formatted()); \(formattedTime(from: duration))")
                             .tag(Int(session.id))
                     }
                 }
@@ -73,5 +74,13 @@ struct RemoveSessionView: View {
         }
         .padding()
         .frame(width: 300)
+    }
+    
+    func formattedTime(from interval: TimeInterval) -> String {
+        let totalSeconds = Int(interval)
+        let minutes = totalSeconds / 60
+        let seconds = totalSeconds % 60
+
+        return String(format: "%04d:%02d", minutes, seconds)
     }
 }
