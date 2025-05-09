@@ -38,6 +38,8 @@ struct ContentView: View {
     @State private var endDate: Date = Date()
     
     @State private var showingAddSession = false
+    
+    @State private var showingRemoveSession = false
 
     struct StringMessage: Identifiable {
         var id: String { text }
@@ -123,13 +125,16 @@ struct ContentView: View {
             HStack {
                 TextField("Commentaire", text: $commentaire)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .frame(width: 250)
+                    .frame(width: 220)
                     .focused($isTextFieldFocused)
                     .opacity(selectedProjectId == nil ? 0.5 : 1.0)
                     .allowsHitTesting(selectedProjectId != nil)
                 if !projects.isEmpty {
                     Button("+") {
                         showingAddSession = true
+                    }
+                    Button("-") {
+                        showingRemoveSession = true
                     }
                 }
             }
@@ -220,6 +225,9 @@ struct ContentView: View {
             if newValue != nil {
                 isTextFieldFocused = true
             }
+        }
+        .sheet(isPresented: $showingRemoveSession) {
+            RemoveSessionView(projectId: selectedProjectId ?? 0)
         }
     }
 

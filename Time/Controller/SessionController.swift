@@ -74,4 +74,6 @@ class SessionController {
 
         task.resume()
     }
+    // TODO fetchSession https://time.bressani.dev:3443/api/sessions?category_id=
+    // with token
 }
