@@ -10,6 +10,7 @@ import SwiftUI
 struct RemoveSessionView: View {
     let categoryId: Int
     @State var selectedSessionId: Int = 0
+    @State var commentaire: String = ""
     @State private var sessions: [Session] = []
     @State private var deleteErrorMessage: StringMessage? = nil
     @Environment(\.dismiss) var dismiss
@@ -28,17 +29,28 @@ struct RemoveSessionView: View {
                             .tag(Int(session.id))
                     }
                 }
+                .onChange(of: selectedSessionId) { _, newId in
+                    if let selected = sessions.first(where: { $0.id == newId }) {
+                        self.commentaire = selected.commentaire ?? ""
+                    }
+                }
                 Button("-") {
                     if selectedSessionId != 0 {
                         SessionController.deleteSession(id: selectedSessionId, completion: { _ in
                             SessionController.fetchSession(categoryId: categoryId, completion: { fetchedSessions in
                                 self.sessions = fetchedSessions
                                 self.selectedSessionId = fetchedSessions.first?.id ?? 0
+                                self.commentaire = fetchedSessions.first?.commentaire ?? ""
                             })
                         }, onError: { errorMessage in
                             self.deleteErrorMessage = StringMessage(text: errorMessage)
                         })
                     }
+                }
+            }
+            HStack {
+                if selectedSessionId != 0 {
+                    Text(self.commentaire).disabled(true)
                 }
             }
             HStack {
@@ -56,6 +68,7 @@ struct RemoveSessionView: View {
             SessionController.fetchSession(categoryId: categoryId, completion: { fetchedSessions in
                 self.sessions = fetchedSessions
                 self.selectedSessionId = fetchedSessions.first?.id ?? 0
+                self.commentaire = fetchedSessions.first?.commentaire ?? ""
             })
         }
         .padding()
