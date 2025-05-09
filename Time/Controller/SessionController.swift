@@ -134,4 +134,34 @@ class SessionController {
             }
         }.resume()
     }
+    
+    static func deleteSession(id: Int, completion: @escaping ([Session]) -> Void, onError: @escaping (String) -> Void) {
+        guard let token = readToken(),
+              let url = URL(string: "https://time.bressani.dev:3443/api/sessions/\(id)") else {
+            onError("Token ou URL invalide.")
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                onError("Erreur réseau : \(error.localizedDescription)")
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode) else {
+                onError("Erreur serveur.")
+                return
+            }
+
+            // Re-fetch the updated sessions list after deletion
+            fetchSession(categoryId: 0, completion: completion) // À adapter si tu veux garder categoryId
+        }.resume()
+    }
+    
+    // TODO deleteSession https://time.bressani.dev:3443/api/sessions/{id}
 }

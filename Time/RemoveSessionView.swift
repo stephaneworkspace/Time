@@ -29,22 +29,23 @@ struct RemoveSessionView: View {
                     }
                 }
                 Button("-") {
-                    /*  if let id = selectedSessionId {
-                       SessionController.deleteSession(id: id, completion: { decoded in
-                            self.sessions = decoded
-                            self.selectedSessionId = decoded.first?.id
+                    if selectedSessionId != 0 {
+                        SessionController.deleteSession(id: selectedSessionId, completion: { _ in
+                            SessionController.fetchSession(categoryId: categoryId, completion: { fetchedSessions in
+                                self.sessions = fetchedSessions
+                                self.selectedSessionId = fetchedSessions.first?.id ?? 0
+                            })
                         }, onError: { errorMessage in
                             self.deleteErrorMessage = StringMessage(text: errorMessage)
                         })
                     }
-                     */
                 }
             }
             HStack {
                 Button(action: {
                     dismiss()
                 }) {
-                    Text("OK")
+                    Text("Retour")
                 }
                 .keyboardShortcut(.defaultAction)
             }
