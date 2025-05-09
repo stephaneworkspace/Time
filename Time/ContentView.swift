@@ -157,7 +157,6 @@ struct ContentView: View {
                     .disabled(!timerRunning)
                 }
             }
-
             Button("Quitter") {
                 NSApplication.shared.terminate(nil)
             }
